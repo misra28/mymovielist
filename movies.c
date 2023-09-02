@@ -37,8 +37,37 @@ movie_t *loaded_movies;
 void save_movie_list() {
 	FILE *fp = NULL;
 	int status = 0;
+	char movie_buffer[100] = { 0 };
+	movie_t *nav = loaded_list;
+	
+	if (nav == NULL) {
+		printf("There are currently no movies in your list to save to a file.\n");	
+		return;
+	}
 
-	fp = fopen();
+	while (status < 1) {
+		printf("Enter the name of the file you would like to save to:\n");
+		status = scanf("%99[^\n]", movie_buffer);
+		while (getchar() != '\n');
+#ifdef DEBUG
+		printf("status = %d, rating_buffer = %f\n", status, rating_buffer);
+#endif
+		fp = fopen(movie_buffer, "rw");
+		if (status < 1 || fp == NULL) {
+			printf("Incorrect input. ");
+			clearerr(stdin);
+		}
+	}
+	
+	while (nav != NULL) {
+		status = fwrite(&nav, sizeof(nav), 1, fp);
+		nav = nav->next;
+		if (status < 1) {
+			break;
+		}
+	}
+
+	printf("File successfully saved!\n\n");
 }
 
 void remove_movie(movie_t **remove_this) {
