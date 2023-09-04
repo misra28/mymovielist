@@ -5,14 +5,12 @@
 
 //#define DEBUG
 
-void add_new_movie(movie_t **);
-void print_movie_list();
-void remove_movie(movie_t **);
+/* movies.h:
 
-/*
 typedef struct actor {
 	char *name;
 	struct actor *next;
+	size_t name_length;
 } actor_t;
 
 typedef struct date {
@@ -22,24 +20,35 @@ typedef struct date {
 } date_t;
 
 typedef struct movie {
+	date_t date_watched;
+	float rating;
 	char *name;
 	char *comments;
-	float rating;
-	date_t date_watched;
 	actor_t *actors;	
 	struct movie *prev;
 	struct movie *next;
+	size_t name_length;
+	size_t comments_length;
+	int runtime;
+	int actor_count;
 } movie_t;
 
 movie_t *loaded_movies;
+
+void add_new_movie(movie_t **);
+void print_movie_list();
+void remove_movie(movie_t **);
+void save_movie_list();
+void load_movie_list();
 */
 
 void save_movie_list() {
 	FILE *fp = NULL;
 	int status = 0;
 	char movie_buffer[100] = { 0 };
-	movie_t *nav = loaded_list;
-	
+	movie_t *nav = loaded_movies;
+	actor_t *actornav = NULL;
+
 	if (nav == NULL) {
 		printf("There are currently no movies in your list to save to a file.\n");	
 		return;
@@ -50,24 +59,160 @@ void save_movie_list() {
 		status = scanf("%99[^\n]", movie_buffer);
 		while (getchar() != '\n');
 #ifdef DEBUG
-		printf("status = %d, rating_buffer = %f\n", status, rating_buffer);
+		printf("status = %d, movie_buffer = %f\n", status, movie_buffer);
 #endif
-		fp = fopen(movie_buffer, "rw");
+		fp = fopen(movie_buffer, "w");
 		if (status < 1 || fp == NULL) {
 			printf("Incorrect input. ");
 			clearerr(stdin);
+			status = 0;
 		}
 	}
 	
 	while (nav != NULL) {
+		status = fwrite(&(nav->name_length), sizeof(nav->name_length), 1, fp);
+		status = fwrite(&(nav->name), sizeof(nav->name), 1, fp);
+		if (status < 1) break;
+		
+		status = fwrite(&(nav->comments_length), sizeof(nav->comments_length), 1, fp);
+		status = fwrite(&(nav->comments), sizeof(nav->comments), 1, fp);	
+		if (status < 1) break;
+		
+		actornav = nav->actors;
+		while (actornav != NULL) {
+			status = fwrite(&(actornav->name_length), sizeof(actornav->name_length), 1, fp);
+			status = fwrite(&(actornav->name), sizeof(actornav->name), 1, fp);
+			status = fwrite(&(actornav), sizeof(actornav), 1, fp);
+			if (status < 1) break;
+			actornav = actornav->next;
+		}
+
 		status = fwrite(&nav, sizeof(nav), 1, fp);
 		nav = nav->next;
+		if (status < 1) break;
+	}
+
+	if (status == 1) {
+		printf("File successfully saved!\n\n");
+	}
+	else {
+		printf("There was an error writing to the file.\n\n");
+	}
+}
+
+void load_movie_list() {
+	FILE *fp = NULL;
+	int status = 0;
+	char movie_buffer[100] = { 0 };
+	movie_t *nav = loaded_movies;
+	movie_t *head = NULL;
+	movie_t *created_movie = NULL;
+	actor_t *actornav = NULL;
+	actor_t *created_actor = NULL;
+	char name_buffer[300] = { 0 };
+	char comments_buffer[300] = { 0 };
+	char actor_buffer[300] = { 0 };
+	int name_length = 0;
+	int comments_length = 0;
+	int actorname_length = 0;
+	int actor_count = 0;
+
+	printf("WARNING: You will lose access to the movies you have loaded up.\n");
+
+	if (nav != NULL) {
+		printf("Please type 'Yes' to confirm that you have saved your loaded movies to a file:\n");
+		status = scanf("%99[^\n]", movie_buffer);
+		while (getchar() != '\n');
+#ifdef DEBUG
+		printf("status = %d, movie_buffer = %s\n", status, movie_buffer);
+#endif
+
 		if (status < 1) {
-			break;
+			printf("Incorrect input. ");
+			clearerr(stdin);
+			status = 0;
+		} else if (!strcmp(movie_buffer, "Yes")) {
+			printf("You did not enter 'Yes' to confirm.\n");
+			return;
+		}
+	}
+	
+	status = 0;
+	while (status < 1) {
+		printf("Enter the name of the existing file you would like to load from:\n");
+		printf("Alternatively, enter 'exit' to quit.\n");
+		status = scanf("%99[^\n]", movie_buffer);
+		while (getchar() != '\n');
+#ifdef DEBUG
+		printf("status = %d, movie_buffer = %s\n", status, movie_buffer);
+#endif
+		if (strcmp(movie_buffer, "exit")) {
+			return;
+		}
+
+		fp = fopen(movie_buffer, "r");	
+
+		if (status < 1 || fp == NULL) {
+			printf("Incorrect input. ");
+			clearerr(stdin);
+			status = 0;
 		}
 	}
 
-	printf("File successfully saved!\n\n");
+	while (loaded_movies != NULL) {
+		remove_movie(&loaded_movies);
+	}
+	
+	
+	while (nav != NULL) {
+		if (head == NULL) {
+			head = nav;
+		}
+
+		nav = (movie_t *) malloc(sizeof(movie_t));
+
+		status = fread(&name_length, sizeof(int), 1, fp);
+		if (status < 1) break;
+		nav->name_length = name_length;
+		nav->name = (char *) malloc(name_length + 1);
+		status = fread(name_buffer, name_length, 1, fp);
+		if (status < 1) break;
+		strcpy(nav->name, name_buffer);
+		
+		status = fread(&comments_length, sizeof(int), 1, fp);
+		if (status < 1) break;
+		nav->comments_length = comments_length;
+		nav->comments = (char *) malloc(comments_length + 1);
+		status = fread(comments_buffer, comments_length, 1, fp);
+		if (status < 1) break;
+		strcpy(nav->comments, comments_buffer);
+		
+		actornav = nav->actors;
+		while (actornav != NULL) {
+			
+			status = fread(&actorname_length, sizeof(int), 1, fp);
+			if (status < 1) break;
+			actornav->name_length = actorname_length;
+			status = fread(actor_buffer, actorname_length, 1, fp);
+			
+			
+			status = fread(&(actornav), sizeof(actornav), 1, fp);
+			if (status < 1) break;
+		}
+
+		status = fread(&nav, sizeof(nav), 1, fp);
+		nav = created_movie;
+		if (status < 1) break;
+	}
+
+	loaded_movies = head;
+
+	if (status == 1) {
+		printf("List successfully loaded!\n\n");
+	}
+	else {
+		printf("There was an error loading from the file.\n\n");
+	}
 }
 
 void remove_movie(movie_t **remove_this) {
@@ -80,6 +225,7 @@ void remove_movie(movie_t **remove_this) {
 	if (remove->prev != NULL) {
 		remove->prev->next = remove->next;
 	}
+
 	if (remove->next != NULL) {
 		remove->next->prev = remove->prev;
 	}
@@ -107,6 +253,15 @@ void print_movie_list() {
 	while (nav != NULL) {
 		actnav = nav->actors;
 		printf("\n\tMOVIE %d: '%s'\n", counter, nav->name);
+		
+		if (nav->runtime > 0) {
+			printf("\tRuntime: %d minute", nav->runtime);
+			if (nav->runtime != 1) printf("s");
+			printf("\n");
+		} else {
+			printf("\tRuntime: Unknown\n");
+		}
+
 		printf("\tRating: %.1f/10.0\n", nav->rating);
 		printf("\tDate watched: %02d/%02d/%04d\n",
 				nav->date_watched.month_watched, nav->date_watched.day_watched, nav->date_watched.year_watched);
@@ -134,6 +289,7 @@ void add_new_movie(movie_t **entered_movie) {
 	int month_buffer = 0;
 	int day_buffer = 0;
 	int year_buffer = 0;
+	int runtime_buffer = 0;
 	int actor_count = 0;
 	
 	*entered_movie = malloc(sizeof(movie_t));
@@ -155,9 +311,11 @@ void add_new_movie(movie_t **entered_movie) {
 	}
 	created_movie->name = malloc(strlen(movie_buffer) + 1);
 	strncpy(created_movie->name, movie_buffer, strlen(movie_buffer));
+	created_movie->name_length = (size_t) strlen(movie_buffer);
 #ifdef DEBUG
-	printf("Successfully identified '%s' as the movie name\n", created_movie->name);
+	printf("Successfully identified '%s' as the movie name with a length of %d\n", created_movie->name, (int) created_movie->name_length);
 #endif
+	printf("\n");
 
 	// Ask for comments
 	status = 0;
@@ -175,9 +333,11 @@ void add_new_movie(movie_t **entered_movie) {
 	}
 	created_movie->comments = malloc(strlen(movie_buffer) + 1);
 	strncpy(created_movie->comments, movie_buffer, strlen(movie_buffer));
+	created_movie->comments_length = (size_t) strlen(movie_buffer);
 #ifdef DEBUG
-	printf("Successfully identified the comments: '%s'\n", created_movie->comments);
+	printf("Successfully identified the comments with a length of %d: '%s'\n", (int) created_movie->comments_length, created_movie->comments);
 #endif
+	printf("\n");
 
 	// Ask for rating
 	status = 0;
@@ -204,6 +364,29 @@ void add_new_movie(movie_t **entered_movie) {
 #ifdef DEBUG
 	printf("Successfully identified the rating: %f\n", created_movie->rating);
 #endif
+	printf("\n");
+
+	// Ask for runtime
+	status = 0;
+	while (status < 1) {
+		printf("Enter the movie's runtime in minutes. If unknown, put 0:\n");
+		status = scanf("%d", &runtime_buffer);
+		while (getchar() != '\n');
+#ifdef DEBUG
+		printf("status = %d, rating_buffer = %f\n", status, rating_buffer);
+#endif
+		if (status < 1 || runtime_buffer < 0) {
+			printf("Incorrect input. ");
+			clearerr(stdin);
+			status = 0;
+		}
+	}
+
+	created_movie->runtime = runtime_buffer;
+#ifdef DEBUG
+	printf("Successfully identified the rating: %f\n", created_movie->rating);
+#endif
+	printf("\n");
 
 	// Ask for date watched
 	status = 0;
@@ -219,6 +402,17 @@ void add_new_movie(movie_t **entered_movie) {
 			clearerr(stdin);
 		}
 	}
+
+	if (month_buffer > 12) {
+		month_buffer = 12;
+		printf("The month number was reduced to %d.\n", month_buffer);
+	}
+
+	if (day_buffer > 31) {
+		day_buffer = 31;
+		printf("The day number was reduced to %d.\n", day_buffer);
+	}
+
 	created_movie->date_watched.month_watched = month_buffer;
 	created_movie->date_watched.day_watched = day_buffer;
 	created_movie->date_watched.year_watched = year_buffer;
@@ -226,6 +420,7 @@ void add_new_movie(movie_t **entered_movie) {
 	printf("Successfully identified the date watched: %d/%d/%d\n", created_movie->date_watched.month_watched,
 			created_movie->date_watched.day_watched, created_movie->date_watched.year_watched);
 #endif
+	printf("\n");
 	
 	// Ask for movie's actors
 	status = 0;
@@ -236,9 +431,11 @@ void add_new_movie(movie_t **entered_movie) {
 #ifdef DEBUG
 		printf("status = %d\n", status);
 #endif
+		printf("\n");
 		if (status < 1 || actor_count < 0 || actor_count > 10) {
 			printf("Incorrect input. ");
 			clearerr(stdin);
+			status = 0;
 		}
 	}
 
@@ -251,6 +448,7 @@ void add_new_movie(movie_t **entered_movie) {
 #ifdef DEBUG
 			printf("status = %d\n", status);
 #endif
+			printf("\n");
 			if (status < 1) {
 				printf("Incorrect input. ");
 				clearerr(stdin);
@@ -260,6 +458,7 @@ void add_new_movie(movie_t **entered_movie) {
 		created_actor = malloc(sizeof(actor_t));
 		created_actor->name = malloc(strlen(movie_buffer) + 1);
 		strcpy(created_actor->name, movie_buffer);
+		created_actor->name_length = (size_t) strlen(movie_buffer);
 
 		created_actor->next = created_movie->actors;
 		created_movie->actors = created_actor;
@@ -348,6 +547,12 @@ int main() {
 		}
 		else if (initial_input == 3) {
 			print_movie_list();
+		}
+		else if (initial_input == 4) {
+			save_movie_list();
+		}
+		else if (initial_input == 5) {
+			load_movie_list();
 		}
 		else if (initial_input == 6) {
 			continue_program = -1;
