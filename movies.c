@@ -70,26 +70,28 @@ void save_movie_list() {
 	}
 	
 	while (nav != NULL) {
-		status = fwrite(&(nav->name_length), sizeof(nav->name_length), 1, fp);
-		status = fwrite(&(nav->name), sizeof(nav->name), 1, fp);
+		status = fwrite(&nav, sizeof(nav), 1, fp);
 		if (status < 1) break;
 		
-		status = fwrite(&(nav->comments_length), sizeof(nav->comments_length), 1, fp);
-		status = fwrite(&(nav->comments), sizeof(nav->comments), 1, fp);	
+		status = fwrite(&(nav->name), strlen(nav->name), 1, fp);
 		if (status < 1) break;
 		
+		status = fwrite(&(nav->comments_length), strlen(nav->comments_length), 1, fp);
+		if (status < 1) break;
+
 		actornav = nav->actors;
 		while (actornav != NULL) {
-			status = fwrite(&(actornav->name_length), sizeof(actornav->name_length), 1, fp);
-			status = fwrite(&(actornav->name), sizeof(actornav->name), 1, fp);
 			status = fwrite(&(actornav), sizeof(actornav), 1, fp);
 			if (status < 1) break;
+			
+			status = fwrite(&(actornav->name), strlen(actornav->name), 1, fp);
+			if (status < 1) break;
+			
 			actornav = actornav->next;
 		}
 
-		status = fwrite(&nav, sizeof(nav), 1, fp);
-		nav = nav->next;
 		if (status < 1) break;
+		nav = nav->next;
 	}
 
 	if (status == 1) {
@@ -108,6 +110,7 @@ void load_movie_list() {
 	movie_t *head = NULL;
 	movie_t *created_movie = NULL;
 	actor_t *actornav = NULL;
+	actor_t *actorhead = NULL;
 	actor_t *created_actor = NULL;
 	char name_buffer[300] = { 0 };
 	char comments_buffer[300] = { 0 };
@@ -165,39 +168,38 @@ void load_movie_list() {
 	
 	
 	while (nav != NULL) {
-		if (head == NULL) {
-			head = nav;
-		}
+		if (head == NULL) head = nav;
 
 		nav = (movie_t *) malloc(sizeof(movie_t));
-
-		status = fread(&name_length, sizeof(int), 1, fp);
+		status = fread(&nav, sizeof(nav), 1, fp);
 		if (status < 1) break;
-		nav->name_length = name_length;
-		nav->name = (char *) malloc(name_length + 1);
-		status = fread(name_buffer, name_length, 1, fp);
+
+		status = fread(name_buffer, nav->name_length, 1, fp);
 		if (status < 1) break;
 		strcpy(nav->name, name_buffer);
 		
-		status = fread(&comments_length, sizeof(int), 1, fp);
-		if (status < 1) break;
-		nav->comments_length = comments_length;
-		nav->comments = (char *) malloc(comments_length + 1);
+		nav->comments = (char *) malloc(strlen(nav->comments_length) + 1);
+		
 		status = fread(comments_buffer, comments_length, 1, fp);
 		if (status < 1) break;
 		strcpy(nav->comments, comments_buffer);
 		
 		actornav = nav->actors;
-		while (actornav != NULL) {
-			
-			status = fread(&actorname_length, sizeof(int), 1, fp);
-			if (status < 1) break;
-			actornav->name_length = actorname_length;
-			status = fread(actor_buffer, actorname_length, 1, fp);
-			
+		if (status < 1) break;
+		
+		for (int i = 0; i < actorname_length; i++) {	
+			actornav = (actor_t *) malloc(sizeof(actor_t));
+			if (nav->actors == NULL) actorhead = actornav;
 			
 			status = fread(&(actornav), sizeof(actornav), 1, fp);
 			if (status < 1) break;
+			
+			actornav->name_length = actorname_length;
+			status = fread(actor_buffer, actorname_length, 1, fp);
+			if (status < 1) break;
+		
+			strcpy(actornav->name, movie_buffer);	
+			
 		}
 
 		status = fread(&nav, sizeof(nav), 1, fp);
