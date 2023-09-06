@@ -76,7 +76,7 @@ void save_movie_list() {
 		status = fwrite(&(nav->name), strlen(nav->name), 1, fp);
 		if (status < 1) break;
 		
-		status = fwrite(&(nav->comments_length), strlen(nav->comments_length), 1, fp);
+		status = fwrite(&(nav->comments), strlen(nav->comments), 1, fp);
 		if (status < 1) break;
 
 		actornav = nav->actors;
@@ -122,7 +122,7 @@ void load_movie_list() {
 
 	printf("WARNING: You will lose access to the movies you have loaded up.\n");
 
-	if (nav != NULL) {
+	if (status < 1) {
 		printf("Please type 'Yes' to confirm that you have saved your loaded movies to a file:\n");
 		status = scanf("%99[^\n]", movie_buffer);
 		while (getchar() != '\n');
@@ -134,7 +134,7 @@ void load_movie_list() {
 			printf("Incorrect input. ");
 			clearerr(stdin);
 			status = 0;
-		} else if (!strcmp(movie_buffer, "Yes")) {
+		} else if (strcmp(movie_buffer, "Yes") != 0) {
 			printf("You did not enter 'Yes' to confirm.\n");
 			return;
 		}
@@ -149,7 +149,7 @@ void load_movie_list() {
 #ifdef DEBUG
 		printf("status = %d, movie_buffer = %s\n", status, movie_buffer);
 #endif
-		if (strcmp(movie_buffer, "exit")) {
+		if (strcmp(movie_buffer, "exit") == 0) {
 			return;
 		}
 
@@ -166,11 +166,17 @@ void load_movie_list() {
 		remove_movie(&loaded_movies);
 	}
 	
-	
-	while (nav != NULL) {
-		if (head == NULL) head = nav;
 
+	while (feof(fp) == 0) {
+		
 		nav = (movie_t *) malloc(sizeof(movie_t));
+		if (head == NULL) {
+			head = nav;
+		}
+		else {
+			created_movie->next = nav;
+		}
+		
 		status = fread(&nav, sizeof(nav), 1, fp);
 		if (status < 1) break;
 
@@ -178,7 +184,7 @@ void load_movie_list() {
 		if (status < 1) break;
 		strcpy(nav->name, name_buffer);
 		
-		nav->comments = (char *) malloc(strlen(nav->comments_length) + 1);
+		nav->comments = (char *) malloc(nav->comments_length + 1);
 		
 		status = fread(comments_buffer, comments_length, 1, fp);
 		if (status < 1) break;
@@ -187,23 +193,27 @@ void load_movie_list() {
 		actornav = nav->actors;
 		if (status < 1) break;
 		
-		for (int i = 0; i < actorname_length; i++) {	
+		for (int i = 0; i < nav->actor_count; i++) {	
 			actornav = (actor_t *) malloc(sizeof(actor_t));
-			if (nav->actors == NULL) actorhead = actornav;
-			
+			if (nav->actors == NULL) {
+				actorhead = actornav;
+			}
+			else {
+				created_actor->next = actornav;
+			}
+
 			status = fread(&(actornav), sizeof(actornav), 1, fp);
 			if (status < 1) break;
 			
 			actornav->name_length = actorname_length;
 			status = fread(actor_buffer, actorname_length, 1, fp);
 			if (status < 1) break;
-		
 			strcpy(actornav->name, movie_buffer);	
 			
+			created_actor = actornav;
 		}
 
-		status = fread(&nav, sizeof(nav), 1, fp);
-		nav = created_movie;
+		created_movie = nav;
 		if (status < 1) break;
 	}
 
