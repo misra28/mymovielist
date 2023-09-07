@@ -70,28 +70,23 @@ void save_movie_list() {
 	}
 	
 	while (nav != NULL) {
-		status = fwrite(&nav, sizeof(nav), 1, fp);
-		if (status < 1) break;
-		
-		status = fwrite(&(nav->name), strlen(nav->name), 1, fp);
-		if (status < 1) break;
-		
-		status = fwrite(&(nav->comments), strlen(nav->comments), 1, fp);
-		if (status < 1) break;
-
+		status = fprintf(fp, "%lu|%s\n%lu|%s\n%f|%d|%d/%d/%d|%d\n",
+				nav->name_length, nav->name, nav->comments_length,
+				nav->comments, nav->rating, nav->runtime, nav->date_watched.month_watched,
+				nav->date_watched.day_watched, nav->date_watched.year_watched, nav->actor_count);
+		if (status < 10) break;
+			
 		actornav = nav->actors;
 		while (actornav != NULL) {
-			status = fwrite(&(actornav), sizeof(actornav), 1, fp);
-			if (status < 1) break;
-			
-			status = fwrite(&(actornav->name), strlen(actornav->name), 1, fp);
+			status = fprintf(fp, "%lu:%s\n", actornav->name_length, actornav->name);
 			if (status < 1) break;
 			
 			actornav = actornav->next;
 		}
 
-		if (status < 1) break;
 		nav = nav->next;
+		status = fprintf(fp, "\n");
+		if (status < 1) break;
 	}
 
 	if (status == 1) {
@@ -100,6 +95,9 @@ void save_movie_list() {
 	else {
 		printf("There was an error writing to the file.\n\n");
 	}
+
+	fclose(fp);
+	fp = NULL;
 }
 
 void load_movie_list() {
@@ -167,8 +165,7 @@ void load_movie_list() {
 	}
 	
 
-	while (feof(fp) == 0) {
-		
+	while (feof(fp) == 0) {	
 		nav = (movie_t *) malloc(sizeof(movie_t));
 		if (head == NULL) {
 			head = nav;
@@ -176,43 +173,38 @@ void load_movie_list() {
 		else {
 			created_movie->next = nav;
 		}
-		
-		status = fread(&nav, sizeof(nav), 1, fp);
+
+		status = fscanf(fp, "%lu|", &(nav->name_length));
 		if (status < 1) break;
 
-		status = fread(name_buffer, nav->name_length, 1, fp);
-		if (status < 1) break;
-		strcpy(nav->name, name_buffer);
-		
+		nav->name = malloc(nav->name_length + 1);
+		status = fscanf(fp, "%[^\n]\n", nav->name);		
+				
+		status = fscanf(fp, "%lu|", &(nav->comments_length));
+		if (status < 1) break;	
+
 		nav->comments = (char *) malloc(nav->comments_length + 1);
-		
-		status = fread(comments_buffer, comments_length, 1, fp);
-		if (status < 1) break;
-		strcpy(nav->comments, comments_buffer);
-		
+		status = fscanf(fp, "%[^\n]\n%f|%d|%d/%d/%d|%d\n",
+				nav->comments, &(nav->rating), &(nav->runtime), &(nav->date_watched.month_watched),
+				&(nav->date_watched.day_watched), &(nav->date_watched.year_watched), &(nav->actor_count));		
+		if (status < 7) break;		
+
 		actornav = nav->actors;
-		if (status < 1) break;
-		
 		for (int i = 0; i < nav->actor_count; i++) {	
 			actornav = (actor_t *) malloc(sizeof(actor_t));
 			if (nav->actors == NULL) {
-				actorhead = actornav;
+				nav->actors = actornav;
 			}
 			else {
 				created_actor->next = actornav;
 			}
 
-			status = fread(&(actornav), sizeof(actornav), 1, fp);
-			if (status < 1) break;
-			
-			actornav->name_length = actorname_length;
-			status = fread(actor_buffer, actorname_length, 1, fp);
-			if (status < 1) break;
-			strcpy(actornav->name, movie_buffer);	
+			status = fscanf(fp, "%lu:%[^\n]\n", &(actornav->name_length), actornav->name);
+			if (status < 2) break;
 			
 			created_actor = actornav;
 		}
-
+		status = fscanf(fp, "\n");
 		created_movie = nav;
 		if (status < 1) break;
 	}
@@ -225,10 +217,17 @@ void load_movie_list() {
 	else {
 		printf("There was an error loading from the file.\n\n");
 	}
+
+	fclose(fp);
+	fp = NULL;
 }
 
 void remove_movie(movie_t **remove_this) {
 	movie_t *remove = *remove_this;
+
+	if (remove_this == NULL || remove == NULL) {
+		return;
+	}
 
 	if (remove->prev == NULL) {
 		loaded_movies = remove->next;
@@ -385,7 +384,7 @@ void add_new_movie(movie_t **entered_movie) {
 		status = scanf("%d", &runtime_buffer);
 		while (getchar() != '\n');
 #ifdef DEBUG
-		printf("status = %d, rating_buffer = %f\n", status, rating_buffer);
+		printf("status = %d, runtime_buffer = %f\n", status, runtime_buffer);
 #endif
 		if (status < 1 || runtime_buffer < 0) {
 			printf("Incorrect input. ");
@@ -450,6 +449,8 @@ void add_new_movie(movie_t **entered_movie) {
 			status = 0;
 		}
 	}
+
+	created_movie->actor_count = actor_count;
 
 	for (int i = 0; i < actor_count; i++) {
 		status = 0;
