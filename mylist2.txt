@@ -1,0 +1,28 @@
+11|Perstando 4
+17|I hope this works
+9.000000|123|12/12/8998|1
+13:I did a thing
+
+11|Perstando 3
+16|Woah not bad eh.
+7.000000|0|12/23/2008|6
+5:Chris
+6:Dwayne
+6:Connor
+4:Joey
+5:Garnt
+13:Jason Statham
+
+11|Perstando 2
+12|Pretty good.
+7.000000|40|3/3/2004|2
+6:Joseph
+6:Jotaro
+
+9|Perstando
+6|Weird.
+8.000000|12|12/12/1221|3
+14:Joseph Joestar
+11:Jolyne Kujo
+11:Jotaro Kujo
+

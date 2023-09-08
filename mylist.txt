@@ -1,6 +1,7 @@
-14|Stando Persona
-12|I like this.
-9.000000|90|10/10/2004|2
+9|Perstando
+6|Weird.
+8.000000|12|12/12/1221|3
 14:Joseph Joestar
+11:Jolyne Kujo
 11:Jotaro Kujo
 
