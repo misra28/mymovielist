@@ -522,7 +522,7 @@ void add_new_movie(movie_t **entered_movie) {
 
 	created_movie->runtime = runtime_buffer;
 #ifdef DEBUG
-	printf("Successfully identified the rating: %f\n", created_movie->rating);
+	printf("Successfully identified the runtime: %d\n", created_movie->runtime);
 #endif
 	printf("\n");
 
