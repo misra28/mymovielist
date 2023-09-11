@@ -27,7 +27,7 @@ typedef struct movie {
 	int actor_count;
 } movie_t;
 
-movie_t *loaded_movies;
+extern movie_t *loaded_movies;
 
 void add_new_movie(movie_t **);
 void print_movie_list();
