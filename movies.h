@@ -18,7 +18,7 @@ typedef struct movie {
 	float rating;
 	char *name;
 	char *comments;
-	actor_t *actors;	
+	actor_t *actors;
 	struct movie *prev;
 	struct movie *next;
 	size_t name_length;
@@ -34,5 +34,13 @@ void print_movie_list();
 void remove_movie(movie_t **);
 void save_movie_list();
 void load_movie_list();
+
+void set_name(movie_t *, char *);
+void set_comments(movie_t *, char *);
+void set_rating(movie_t *, float);
+void set_runtime(movie_t *, int);
+void set_date(movie_t *, int, int, int);
+void add_actor(movie_t *, char *);
+void remove_actor(movie_t *, char *);
 
 #endif
