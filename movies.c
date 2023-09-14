@@ -27,7 +27,7 @@ typedef struct movie {
 	float rating;
 	char *name;
 	char *comments;
-	actor_t *actors;	
+	actor_t *actors;
 	struct movie *prev;
 	struct movie *next;
 	size_t name_length;
@@ -43,6 +43,9 @@ void print_movie_list();
 void remove_movie(movie_t **);
 void save_movie_list();
 void load_movie_list();
+
+void alphabetize_movies();
+void sorting_menu();
 */
 
 void save_movie_list() {
@@ -54,7 +57,7 @@ void save_movie_list() {
 	int i = 0;
 
 	if (nav == NULL) {
-		printf("There are currently no movies in your list to save to a file.\n");	
+		printf("There are currently no movies in your list to save to a file.\n");
 		return;
 	}
 
@@ -235,6 +238,10 @@ void load_movie_list() {
 	}
 	else {
 		printf("\nThere was an error loading from the file.\n\n");
+		// Remove all movies
+		while (loaded_movies != NULL) {
+			remove_movie(&loaded_movies);
+		}
 	}
 
 	fclose(fp);
@@ -262,9 +269,9 @@ void remove_movie(movie_t **remove_this) {
 
 	remove->prev = NULL;
 	remove->next = NULL;
-	free(remove->name);
+	if (remove->name != NULL) free(remove->name);
 	remove->name = NULL;
-	free(remove->comments);
+	if (remove->comments != NULL) free(remove->comments);
 	remove->comments = NULL;
 	
 	while (remove->actors != NULL) {
@@ -302,9 +309,11 @@ void set_comments(movie_t *created_movie, char *movie_buffer) {
 
 void set_rating(movie_t *created_movie, float rating_buffer) {
 	if (rating_buffer > 10) {
+		printf("The rating was reduced to 10.\n");
 		rating_buffer = 10;
 	}
 	else if (rating_buffer < 1) {
+		printf("The rating was increased to 1.\n");
 		rating_buffer = 1;
 	}
 	created_movie->rating = rating_buffer;

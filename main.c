@@ -6,8 +6,8 @@ int main() {
 	int continue_program = 0;
 	int initial_input = 0;
 	int status = 0;
-	const int OPTION_COUNT = 6;
-	movie_t *new_movie = NULL;	
+	const int OPTION_COUNT = 7;
+	movie_t *new_movie = NULL;
 	char movie_buffer[300] = { 0 };
 	movie_t *nav = NULL;
 	int found_desired_movie = 0;
@@ -19,16 +19,17 @@ int main() {
 			printf("1. Add movie to my list\n");
 			printf("2. Remove movie from my list\n");
 			printf("3. View my list\n");
-			printf("4. Save my list to a file\n");
-			printf("5. Load my list from a file\n");
-			printf("6. Exit\n\n");
+			printf("4. Sort my movies\n");
+			printf("5. Save my list to a file\n");
+			printf("6. Load my list from a file\n");
+			printf("7. Exit\n\n");
 
 			status = scanf("%d", &initial_input);
 			while (getchar() != '\n');
 			if (status < 1 || initial_input < 1 || initial_input > OPTION_COUNT) {
 				printf("Incorrect input. Please enter a number from 1 to %d.\n\n", OPTION_COUNT);
 				printf("initial_input is %d\n", initial_input);
-				clearerr(stdin);	
+				clearerr(stdin);
 			}
 		}
 		
@@ -66,32 +67,35 @@ int main() {
 			}
 
 			if (found_desired_movie == 0) {
-				printf("The movie name you entered is not in your list. Please make sure it is entered correctly.\n\n");
+				printf("\nThe movie name you entered is not in your list. Please make sure it is entered correctly.\n");
 			}
 			else {
-				printf("'%s' was successfully removed from your list!", movie_buffer);
+				printf("\n'%s' was successfully removed from your list!\n", movie_buffer);
 			}
 		}
 		else if (initial_input == 3) {
 			print_movie_list();
 		}
 		else if (initial_input == 4) {
-			save_movie_list();
+			sorting_menu();
 		}
 		else if (initial_input == 5) {
-			load_movie_list();
+			save_movie_list();
 		}
 		else if (initial_input == 6) {
+			load_movie_list();
+		}
+		else if (initial_input == OPTION_COUNT) {
 			continue_program = -1;
 			while (loaded_movies != NULL) {
 				remove_movie(&loaded_movies);
 			}
 		}
 		
-		if (initial_input != 6) {
+		if (initial_input != OPTION_COUNT) {
 			printf("\nWhat would you like to do next?\n");
 			continue_program = 0;
-			initial_input = 0;	
+			initial_input = 0;
 		}
 	}
 	printf("Thank you so much for using MyMovieList!\n\n");
