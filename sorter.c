@@ -3,13 +3,15 @@
 #include <string.h>
 #include "movies.h"
 
-#define compare(X, Y) ((X) > (Y)) ? ((X) : (Y))
-
 void sorting_menu() {
-	int continue_sorting = 0;
 	int initial_input = 0;
 	int status = 0;
 	const int OPTION_COUNT = 7;
+
+	if (loaded_movies == NULL || loaded_movies->next == NULL) {
+		printf("\nYou do not have enough movies to sort.\n\n");
+		return;
+	}
 
 	printf("Please choose a sorting option for your movies.\n\n");
 	
@@ -42,7 +44,8 @@ void sorting_menu() {
 void sort_movies(int sorting_type) {
 	movie_t *new_list = NULL;
 	movie_t *get_movie = NULL;
-	movie_t *nav = NULL;
+	movie_t *nav = loaded_movies;
+	loaded_movies = NULL;
 
 	while (nav != NULL) {
 		get_movie = nav;
@@ -58,12 +61,15 @@ void sort_movies(int sorting_type) {
 		new_list = insert_movie(new_list, get_movie, sorting_type);
 		get_movie = NULL;
 	}
+	printf("\nSorting complete!\n");
+	loaded_movies = new_list;
 }
 
 movie_t *insert_movie(movie_t *sorted_list, movie_t *insert, int sorting_type) {
 	movie_t *nav = sorted_list;
-	char *val1 = NULL;
-	char *val2 = NULL;
+	char *insert_val = NULL;
+	char *nav_val = NULL;
+	char *nav_next_val = NULL;
 
 	// If the sorted_list is currently empty
 	if (sorted_list == NULL) {
@@ -71,8 +77,13 @@ movie_t *insert_movie(movie_t *sorted_list, movie_t *insert, int sorting_type) {
 		return sorted_list;
 	}
 
+	if (sorting_type == 1) {
+		insert_val = (char *) insert->name;
+		nav_val = (char *) nav->name;
+	}
+
 	// If the insert node's value is less than that of the head
-	if (insert->val < sorted_list->val) {
+	if (strcmp(insert_val, nav_val) < 0) {
 		insert->next = sorted_list;
 		insert->prev = NULL;
 		sorted_list = insert;
@@ -81,13 +92,25 @@ movie_t *insert_movie(movie_t *sorted_list, movie_t *insert, int sorting_type) {
 	else if (sorted_list->next == NULL) {
 		sorted_list->next = insert;
 		insert->next = NULL;
+		insert->prev = sorted_list;
 		return sorted_list;
 	}
 	else {
 		while (nav->next != NULL) {
-			if (nav->val <= insert->val && insert->val <= nav->next->val) {
+			if (sorting_type == 1) {
+				nav_next_val = (char *) nav->next->name;
+				insert_val = (char *) insert->name;
+				nav_val = (char *) nav->name;
+			}
+
+			if (strcmp(insert_val, nav_val) > 0 &&
+					strcmp(nav_next_val, insert_val) > 0) {
 				insert->next = nav->next;
 				nav->next = insert;
+				insert->prev = nav;
+				if (insert->next != NULL) {
+					insert->next->prev = insert;
+				}
 				return sorted_list;
 			}
 			nav = nav->next;
