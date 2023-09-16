@@ -33,7 +33,7 @@ void sorting_menu() {
 		}
 	}
 
-	if (initial_input == 1) {
+	if (initial_input > 0 && initial_input < OPTION_COUNT) {
 		sort_movies(initial_input);
 	}
 	else if (initial_input == OPTION_COUNT) {
@@ -61,6 +61,7 @@ void sort_movies(int sorting_type) {
 		new_list = insert_movie(new_list, get_movie, sorting_type);
 		get_movie = NULL;
 	}
+
 	printf("\nSorting complete!\n");
 	loaded_movies = new_list;
 }
@@ -70,6 +71,9 @@ movie_t *insert_movie(movie_t *sorted_list, movie_t *insert, int sorting_type) {
 	char *insert_val = NULL;
 	char *nav_val = NULL;
 	char *nav_next_val = NULL;
+	float insert_num = -1.0;
+	float nav_num = -1.0;
+	float nav_next_num = -1.0;
 
 	// If the sorted_list is currently empty
 	if (sorted_list == NULL) {
@@ -77,34 +81,49 @@ movie_t *insert_movie(movie_t *sorted_list, movie_t *insert, int sorting_type) {
 		return sorted_list;
 	}
 
+	// Determine the values to compare
 	if (sorting_type == 1) {
 		insert_val = (char *) insert->name;
 		nav_val = (char *) nav->name;
 	}
+	else if (sorting_type == 2) {
+		insert_num = (float) insert->rating;
+		nav_num = (float) nav->rating;
+	}
 
 	// If the insert node's value is less than that of the head
-	if (strcmp(insert_val, nav_val) < 0) {
+	if ((insert_num != -1.0 && (insert_num > nav_num)) ||
+		(insert_val != NULL && (strcmp(insert_val, nav_val) < 0))) {
 		insert->next = sorted_list;
 		insert->prev = NULL;
+		sorted_list->prev = insert;
 		sorted_list = insert;
 		return sorted_list;
 	}
+	// If the sorted_list only has one node and the insert node must be placed after it
 	else if (sorted_list->next == NULL) {
 		sorted_list->next = insert;
 		insert->next = NULL;
 		insert->prev = sorted_list;
 		return sorted_list;
 	}
+	// If there are multiple nodes in sorted_list
 	else {
 		while (nav->next != NULL) {
 			if (sorting_type == 1) {
-				nav_next_val = (char *) nav->next->name;
 				insert_val = (char *) insert->name;
 				nav_val = (char *) nav->name;
+				nav_next_val = (char *) nav->next->name;
+			}
+			else if (sorting_type == 2) {
+				insert_num = (float) insert->rating;
+				nav_num = (float) nav->rating;
+				nav_next_num = (float) nav->next->rating;
 			}
 
-			if (strcmp(insert_val, nav_val) > 0 &&
-					strcmp(nav_next_val, insert_val) > 0) {
+			if ((insert_num != -1.0 && (insert_num < nav_num && nav_next_num < insert_num)) ||
+					(insert_val != NULL && (strcmp(insert_val, nav_val) > 0 &&
+					strcmp(nav_next_val, insert_val) > 0))) {
 				insert->next = nav->next;
 				nav->next = insert;
 				insert->prev = nav;
@@ -116,6 +135,7 @@ movie_t *insert_movie(movie_t *sorted_list, movie_t *insert, int sorting_type) {
 			nav = nav->next;
 		}
 	}
+
 	nav->next = insert;
 	return sorted_list;
 }
