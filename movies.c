@@ -165,11 +165,12 @@ void load_movie_list() {
 		}
 	}
 
-	// Remove all movies
+	// Remove all loaded movies
 	while (loaded_movies != NULL) {
 		remove_movie(&loaded_movies);
 	}
 
+	// Load movies from the file
 	while (feof(fp) == 0) {
 		created_movie = (movie_t *) malloc(sizeof(movie_t));
 		if (loaded_movies == NULL) {
@@ -571,6 +572,7 @@ void print_movie_list() {
 	while (nav != NULL) {
 		actnav = nav->actors;
 		printf("\n\tMOVIE %d: '%s'\n", counter, nav->name);
+		printf("\tRating: %.1f / 10.0\n", nav->rating);
 		
 		if (nav->runtime > 0) {
 			printf("\tRuntime: %d minute", nav->runtime);
@@ -580,7 +582,6 @@ void print_movie_list() {
 			printf("\tRuntime: Unknown\n");
 		}
 
-		printf("\tRating: %.1f/10.0\n", nav->rating);
 		printf("\tDate watched: %02d/%02d/%04d\n",
 				nav->date_watched.month_watched, nav->date_watched.day_watched, nav->date_watched.year_watched);
 		printf("\tActor count in this movie: %d\n", nav->actor_count);
