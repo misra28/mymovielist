@@ -4,7 +4,7 @@
 #include <string.h>
 #include "movies.h"
 
-#define DEBUG
+// #define DEBUG
 
 movie_t *loaded_movies;
 

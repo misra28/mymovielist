@@ -44,7 +44,7 @@ void add_actor(movie_t *, char *);
 void remove_actor(movie_t *, char *);
 
 void sorting_menu();
-void sort_movies(int);
-movie_t *insert_movie(movie_t *, movie_t *, int);
+void sort_movies(int, int);
+movie_t *insert_movie(movie_t *, movie_t *, int, int);
 
 #endif

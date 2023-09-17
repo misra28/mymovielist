@@ -12,7 +12,7 @@ int main() {
 	movie_t *nav = NULL;
 	int found_desired_movie = 0;
 
-	printf("Welcome to MyMovieList!\nSelect an option by entering the corresponding number.\n\n");
+	printf("\n\n\nWelcome to MyMovieList!\nSelect an option by entering the corresponding number.\n\n");
 	
 	while (continue_program == 0) {
 		while (initial_input < 1 || initial_input > OPTION_COUNT) {
