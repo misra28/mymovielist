@@ -82,7 +82,7 @@ void save_movie_list() {
 				nav->comments, nav->rating, nav->runtime, nav->date_watched.month_watched,
 				nav->date_watched.day_watched, nav->date_watched.year_watched, nav->actor_count);
 		if (status < 10) break;
-		
+
 #ifdef DEBUG
 		printf("sizeof(nav) == %lu\n", sizeof(nav));
 		printf("\n%lu|%s\n%lu|%s\n%f|%d|%d/%d/%d|%d\n\n",
@@ -165,7 +165,7 @@ void load_movie_list() {
 		}
 	}
 
-	// Remove all loaded movies
+	// Remove all currently loaded movies
 	while (loaded_movies != NULL) {
 		remove_movie(&loaded_movies);
 	}
@@ -223,6 +223,7 @@ void load_movie_list() {
 			printf("actornav->name = %s\n", actornav->name);
 #endif
 		}
+
 		actornav->next = NULL;
 		fscanf(fp, "\n");
 #ifdef DEBUG
@@ -275,7 +276,7 @@ void remove_movie(movie_t **remove_this) {
 	if (remove->comments != NULL) free(remove->comments);
 	remove->comments = NULL;
 	
-	while (remove->actors != NULL) {
+	while (remove->actors != NULL && remove->actor_count != 0) {
 		remove_actor(remove, remove->actors->name);
 	}
 
@@ -335,6 +336,11 @@ void set_date(movie_t *created_movie, int month_buffer, int day_buffer, int year
 		printf("The day number was reduced to %d.\n", day_buffer);
 	}
 
+	if (year_buffer > 9999) {
+		year_buffer = 9999;
+		printf("The year was reduced to %d.\n", year_buffer);
+	}
+
 	created_movie->date_watched.month_watched = month_buffer;
 	created_movie->date_watched.day_watched = day_buffer;
 	created_movie->date_watched.year_watched = year_buffer;
@@ -360,11 +366,17 @@ void remove_actor(movie_t *movie, char *name) {
 
 	actor_t *actornav2 = actornav->next;
 	if (strcmp(actornav->name, name) == 0) {
+		if (movie->actor_count == 1) movie->actors->next = NULL;
+#ifdef DEBUG
+		printf("Removing actor: %s\n", actornav->name);
+		printf("movie->actor_count is about to be %d\n", (-1 + movie->actor_count));
+#endif
 		movie->actors = actornav2;
 		free(actornav->name);
 		actornav->name = NULL;
 		free(actornav);
 		actornav = NULL;
+		movie->actor_count -= 1;
 		return;
 	}
 
@@ -384,9 +396,8 @@ void remove_actor(movie_t *movie, char *name) {
 		actornav2->name = NULL;
 		free(actornav2);
 		actornav2 = NULL;
+		movie->actor_count -= 1;
 	}
-
-	movie->actor_count -= 1;
 }
 
 void add_new_movie(movie_t **entered_movie) {

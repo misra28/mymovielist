@@ -9,6 +9,7 @@ void sorting_menu() {
 	const int OPTION_COUNT = 6;
 	int ascending = 0;
 
+	// Check to make sure there are movies to sort
 	if (loaded_movies == NULL || loaded_movies->next == NULL) {
 		printf("\nYou do not have enough movies to sort.\n\n");
 		return;
@@ -16,6 +17,7 @@ void sorting_menu() {
 
 	printf("Please choose a sorting option for your movies.\n\n");
 
+	// Display sorting options
 	while (initial_input < 1 || initial_input > OPTION_COUNT) {
 		printf("1. By name (alphabetically)\n");
 		printf("2. By rating\n");
@@ -35,6 +37,7 @@ void sorting_menu() {
 		}
 	}
 
+	// Display ascending/descending options
 	while (ascending < 1 || ascending > 2) {
 		printf("Sort in ascending or descending order?\n\n");
 		printf("1. Ascending (least/lowest first)\n");
@@ -51,6 +54,7 @@ void sorting_menu() {
 		}
 	}
 
+	// Call sort_movies() if arguments are correct
 	if (initial_input > 0 && initial_input < OPTION_COUNT) {
 		sort_movies(initial_input, ascending);
 	}
@@ -65,7 +69,9 @@ void sort_movies(int sorting_type, int ascending) {
 	movie_t *nav = loaded_movies;
 	loaded_movies = NULL;
 
+	// Go through the remaining nodes in the original list
 	while (nav != NULL) {
+		// Isolate the first node of the list
 		get_movie = nav;
 		nav = nav->next;
 		if (get_movie->prev != NULL) {
@@ -76,6 +82,8 @@ void sort_movies(int sorting_type, int ascending) {
 		}
 		get_movie->prev = NULL;
 		get_movie->next = NULL;
+		
+		// Insert the isolated node into the new list
 		new_list = insert_movie(new_list, get_movie, sorting_type, ascending);
 		get_movie = NULL;
 	}
@@ -116,7 +124,9 @@ movie_t *insert_movie(movie_t *sorted_list, movie_t *insert, int sorting_type, i
 		return sorted_list;
 	}
 
-	// Determine the values to compare
+	/* Determine the elements to compare and the
+	   function to be stored in compare_func
+	*/
 	if (sorting_type == 1) {
 		insert_val = (void *) insert->name;
 		nav_val = (void *) nav->name;
@@ -167,6 +177,7 @@ movie_t *insert_movie(movie_t *sorted_list, movie_t *insert, int sorting_type, i
 	// If there are multiple nodes in sorted_list
 	else {
 		while (nav->next != NULL) {
+			// Get the right elements to compare
 			if (sorting_type == 1) {
 				insert_val = (void *) insert->name;
 				nav_val = (void *) nav->name;
@@ -203,6 +214,7 @@ movie_t *insert_movie(movie_t *sorted_list, movie_t *insert, int sorting_type, i
 				nav_next_val = (void *) &(nav->next->actor_count);
 			}
 
+			// Insert the node into the correct location
 			if (compare_func(insert_val, nav_val, ascending) > 0 &&
 					compare_func(nav_next_val, insert_val, ascending) >= 0) {
 				insert->next = nav->next;
@@ -217,8 +229,9 @@ movie_t *insert_movie(movie_t *sorted_list, movie_t *insert, int sorting_type, i
 		}
 	}
 
-	// If the node to insert has not yet been inserted,
-	// it must be inserted at the tail
+	/* If the node to insert has not yet been inserted,
+	   it must be inserted at the tail
+	*/
 	nav->next = insert;
 	insert->prev = nav;
 	insert->next = NULL;

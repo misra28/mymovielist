@@ -6,7 +6,7 @@ int main() {
 	int continue_program = 0;
 	int initial_input = 0;
 	int status = 0;
-	const int OPTION_COUNT = 7;
+	const int OPTION_COUNT = 8;
 	movie_t *new_movie = NULL;
 	char movie_buffer[300] = { 0 };
 	movie_t *nav = NULL;
@@ -19,10 +19,11 @@ int main() {
 			printf("1. Add movie to my list\n");
 			printf("2. Remove movie from my list\n");
 			printf("3. View my list\n");
-			printf("4. Sort my movies\n");
-			printf("5. Save my list to a file\n");
-			printf("6. Load my list from a file\n");
-			printf("7. Exit\n\n");
+			printf("4. Edit my movies' information\n");
+			printf("5. Sort my movies\n");
+			printf("6. Save my list to a file\n");
+			printf("7. Load my list from a file\n");
+			printf("8. Exit\n\n");
 
 			status = scanf("%d", &initial_input);
 			while (getchar() != '\n');
@@ -77,12 +78,15 @@ int main() {
 			print_movie_list();
 		}
 		else if (initial_input == 4) {
-			sorting_menu();
+			select_movie();
 		}
 		else if (initial_input == 5) {
-			save_movie_list();
+			sorting_menu();
 		}
 		else if (initial_input == 6) {
+			save_movie_list();
+		}
+		else if (initial_input == 7) {
 			load_movie_list();
 		}
 		else if (initial_input == OPTION_COUNT) {

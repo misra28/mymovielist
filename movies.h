@@ -47,4 +47,9 @@ void sorting_menu();
 void sort_movies(int, int);
 movie_t *insert_movie(movie_t *, movie_t *, int, int);
 
+void select_movie();
+void editing_menu(movie_t *);
+void edit_movie_name(movie_t *);
+void edit_comments(movie_t *);
+
 #endif
