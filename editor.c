@@ -35,7 +35,7 @@ void select_movie() {
 			status = 0;
 		}
 	}
-	
+	printf("\n");
 	editing_menu(nav);
 }
 
@@ -66,10 +66,155 @@ void editing_menu(movie_t *movie_to_edit) {
 	
 	if (initial_input == 1) {
 		edit_movie_name(movie_to_edit);
+		printf("This movie's name was changed to '%s'!\n\n", movie_to_edit->name);
 	}
 	else if (initial_input == 2) {
 		edit_comments(movie_to_edit);
+		printf("This movie's comments were changed to '%s'!\n\n", movie_to_edit->comments);
 	}
+	else if (initial_input == 3) {
+		edit_rating(movie_to_edit);
+	}
+	else if (initial_input == 4) {
+		edit_runtime(movie_to_edit);
+	}
+	else if (initial_input == 5) {
+		edit_date(movie_to_edit);
+	}
+	else if (initial_input == 6) {
+		new_actor(movie_to_edit);
+		printf("Added a new actor!\n\n");
+	}
+	else if (initial_input == 7) {
+		delete_actor(movie_to_edit);
+	}
+	else if (initial_input == 8) {
+		return;
+	}
+}
+
+void delete_actor(movie_t *movie_to_edit) {
+	int status = 0;
+	char movie_buffer[300] = { 0 };
+
+	while (status < 1) {
+		printf("Enter the name of the actor to remove:\n");
+		status = scanf("%299[^\n]", movie_buffer);
+		while (getchar() != '\n');
+#ifdef DEBUG
+		printf("status = %d\n", status);
+#endif
+		printf("\n");
+		if (status < 1) {
+			printf("Incorrect input. ");
+			clearerr(stdin);
+		}
+	}
+	printf("\n");
+	remove_actor(movie_to_edit, movie_buffer);
+}
+
+void new_actor(movie_t *movie_to_edit) {
+	int status = 0;
+	char movie_buffer[300] = { 0 };
+
+	while (status < 1) {
+		printf("Enter the name of the actor to add:\n");
+		status = scanf("%299[^\n]", movie_buffer);
+		while (getchar() != '\n');
+#ifdef DEBUG
+		printf("status = %d\n", status);
+#endif
+		printf("\n");
+		if (status < 1) {
+			printf("Incorrect input. ");
+			clearerr(stdin);
+		}
+	}
+	printf("\n");
+	add_actor(movie_to_edit, movie_buffer);
+}
+
+void edit_date(movie_t *movie_to_edit) {
+	int status = 0;
+	int month_buffer = 0;
+	int day_buffer = 0;
+	int year_buffer = 0;
+
+	// Ask for date watched
+	status = 0;
+	while (status < 3) {
+		printf("Enter the date you watched the movie in the format MM/DD/YYYY:\n");
+		status = scanf("%d/%d/%d", &month_buffer, &day_buffer, &year_buffer);
+		while (getchar() != '\n');
+#ifdef DEBUG
+		printf("status = %d\n", status);
+#endif
+		if (status < 3) {
+			printf("Incorrect input. ");
+			clearerr(stdin);
+		}
+	}
+
+	set_date(movie_to_edit, month_buffer, day_buffer, year_buffer);
+#ifdef DEBUG
+	printf("Successfully identified the date watched: %d/%d/%d\n", movie_to-edit->date_watched.month_watched,
+			movie_to_edit->date_watched.day_watched, movie_to_edit->date_watched.year_watched);
+#endif
+	printf("\n");
+}
+
+void edit_runtime(movie_t *movie_to_edit) {
+	int status = 0;
+	int runtime_buffer = 0;
+
+	// Ask for runtime
+	status = 0;
+	while (status < 1) {
+		printf("Enter the movie's runtime in minutes. If unknown, put 0:\n");
+		status = scanf("%d", &runtime_buffer);
+		while (getchar() != '\n');
+#ifdef DEBUG
+		printf("status = %d, runtime_buffer = %d\n", status, runtime_buffer);
+#endif
+		if (status < 1 || runtime_buffer < 0) {
+			printf("Incorrect input. ");
+			clearerr(stdin);
+			status = 0;
+		}
+	}
+
+	set_runtime(movie_to_edit, runtime_buffer);
+#ifdef DEBUG
+	printf("Successfully identified the runtime: %d\n", movie_to_edit->runtime);
+#endif
+	printf("\n");
+}
+
+void edit_rating(movie_t *movie_to_edit) {
+	int status = 0;
+	float rating_buffer = 0.0;
+
+	// Ask for rating
+	status = 0;
+	while (status < 1) {
+		printf("Enter your rating for the movie (from 1 to 10):\n");
+		status = scanf("%f", &rating_buffer);
+		while (getchar() != '\n');
+#ifdef DEBUG
+		printf("status = %d, rating_buffer = %f\n", status, rating_buffer);
+#endif
+		if (status < 1) {
+			printf("Incorrect input. ");
+			clearerr(stdin);
+		}
+	}
+
+	set_rating(movie_to_edit, rating_buffer);
+#ifdef DEBUG
+	printf("Successfully identified the rating: %f\n", movie_to_edit->rating);
+#endif
+	printf("\n");
 }
 
 void edit_comments(movie_t *movie_to_edit) {
@@ -93,7 +238,6 @@ void edit_comments(movie_t *movie_to_edit) {
 	printf("\n");
 
 	set_comments(movie_to_edit, movie_buffer);
-	printf("This movie's comments were changed to '%s'!\n\n", movie_to_edit->comments);
 }
 
 void edit_movie_name(movie_t *movie_to_edit) {
@@ -116,5 +260,4 @@ void edit_movie_name(movie_t *movie_to_edit) {
 	printf("\n");
 
 	set_name(movie_to_edit, movie_buffer);
-	printf("This movie's name was changed to '%s'!\n\n", movie_to_edit->name);
 }

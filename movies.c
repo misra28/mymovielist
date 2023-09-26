@@ -8,46 +8,6 @@
 
 movie_t *loaded_movies;
 
-/* movies.h:
-
-typedef struct actor {
-	char *name;
-	struct actor *next;
-	size_t name_length;
-} actor_t;
-
-typedef struct date {
-	int month_watched;
-	int day_watched;
-	int year_watched;
-} date_t;
-
-typedef struct movie {
-	date_t date_watched;
-	float rating;
-	char *name;
-	char *comments;
-	actor_t *actors;
-	struct movie *prev;
-	struct movie *next;
-	size_t name_length;
-	size_t comments_length;
-	int runtime;
-	int actor_count;
-} movie_t;
-
-movie_t *loaded_movies;
-
-void add_new_movie(movie_t **);
-void print_movie_list();
-void remove_movie(movie_t **);
-void save_movie_list();
-void load_movie_list();
-
-void alphabetize_movies();
-void sorting_menu();
-*/
-
 void save_movie_list() {
 	FILE *fp = NULL;
 	int status = 0;
@@ -347,14 +307,29 @@ void set_date(movie_t *created_movie, int month_buffer, int day_buffer, int year
 }
 
 void add_actor(movie_t *created_movie, char *movie_buffer) {
+	actor_t *actornav = created_movie->actors;
+
+	// Allocate a new node for the created actor depending on the buffer's size
 	actor_t *created_actor = malloc(sizeof(actor_t));
 	created_actor->name = malloc(strlen(movie_buffer) + 1);
 	strncpy(created_actor->name, movie_buffer, strlen(movie_buffer));
 	created_actor->name[strlen(movie_buffer)] = '\0';
 	created_actor->name_length = (size_t) strlen(movie_buffer);
 
-	created_actor->next = created_movie->actors;
-	created_movie->actors = created_actor;
+	// Append the new node to the linked list of the movie's actors
+	if (actornav == NULL) {
+		created_movie->actors = created_actor;
+		created_movie->actor_count += 1;
+		created_actor = NULL;
+		return;
+	}
+
+	while (actornav->next != NULL) {
+		actornav = actornav->next;
+	}
+
+	actornav->next = created_actor;
+	created_actor->next = NULL;
 	created_movie->actor_count += 1;
 	created_actor = NULL;
 }
@@ -397,127 +372,25 @@ void remove_actor(movie_t *movie, char *name) {
 		free(actornav2);
 		actornav2 = NULL;
 		movie->actor_count -= 1;
+		printf("Successfully removed '%s'!\n\n", name);
+	}
+	else {
+		printf("'%s' was not recognized as an actor in '%s'.\n", name, movie->name);
 	}
 }
 
 void add_new_movie(movie_t **entered_movie) {
 	int status = 0;
-	char movie_buffer[300] = { 0 };
-	float rating_buffer = 0.0;
-	int month_buffer = 0;
-	int day_buffer = 0;
-	int year_buffer = 0;
-	int runtime_buffer = 0;
 	int actor_count = 0;
 	
 	*entered_movie = malloc(sizeof(movie_t));
 	movie_t *created_movie = *entered_movie;
 
-	// Ask for movie name
-	while (status < 1) {
-		printf("Enter the name of the movie:\n");
-		status = scanf("%299[^\n]", movie_buffer);
-		while (getchar() != '\n');
-#ifdef DEBUG
-		printf("status = %d, movie_buffer = '%s'\n", status, movie_buffer);
-#endif
-		if (status < 1) {
-			printf("Incorrect input. ");
-			clearerr(stdin);
-		}
-	}
-	created_movie->name = NULL;
-	set_name(created_movie, movie_buffer);
-#ifdef DEBUG
-	printf("Successfully identified '%s' as the movie name with a length of %d\n", created_movie->name, (int) created_movie->name_length);
-#endif
-	printf("\n");
-
-	// Ask for comments
-	status = 0;
-	while (status < 1) {
-		printf("Enter your comments for the movie:\n");
-		status = scanf("%299[^\n]", movie_buffer);
-		while (getchar() != '\n');
-#ifdef DEBUG
-		printf("status = %d, movie_buffer = '%s'\n", status, movie_buffer);
-#endif
-		if (status < 1) {
-			printf("Incorrect input. ");
-			clearerr(stdin);
-		}
-	}
-	created_movie->comments = NULL;
-	set_comments(created_movie, movie_buffer);
-#ifdef DEBUG
-	printf("Successfully identified the comments with a length of %d: '%s'\n", (int) created_movie->comments_length, created_movie->comments);
-#endif
-	printf("\n");
-
-	// Ask for rating
-	status = 0;
-	while (status < 1) {
-		printf("Enter your rating for the movie (from 1 to 10):\n");
-		status = scanf("%f", &rating_buffer);
-		while (getchar() != '\n');
-#ifdef DEBUG
-		printf("status = %d, rating_buffer = %f\n", status, rating_buffer);
-#endif
-		if (status < 1) {
-			printf("Incorrect input. ");
-			clearerr(stdin);
-		}
-	}
-
-	set_rating(created_movie, rating_buffer);
-#ifdef DEBUG
-	printf("Successfully identified the rating: %f\n", created_movie->rating);
-#endif
-	printf("\n");
-
-	// Ask for runtime
-	status = 0;
-	while (status < 1) {
-		printf("Enter the movie's runtime in minutes. If unknown, put 0:\n");
-		status = scanf("%d", &runtime_buffer);
-		while (getchar() != '\n');
-#ifdef DEBUG
-		printf("status = %d, runtime_buffer = %d\n", status, runtime_buffer);
-#endif
-		if (status < 1 || runtime_buffer < 0) {
-			printf("Incorrect input. ");
-			clearerr(stdin);
-			status = 0;
-		}
-	}
-
-	set_runtime(created_movie, runtime_buffer);
-#ifdef DEBUG
-	printf("Successfully identified the runtime: %d\n", created_movie->runtime);
-#endif
-	printf("\n");
-
-	// Ask for date watched
-	status = 0;
-	while (status < 3) {
-		printf("Enter the date you watched the movie in the format MM/DD/YYYY:\n");
-		status = scanf("%d/%d/%d", &month_buffer, &day_buffer, &year_buffer);
-		while (getchar() != '\n');
-#ifdef DEBUG
-		printf("status = %d\n", status);
-#endif
-		if (status < 3) {
-			printf("Incorrect input. ");
-			clearerr(stdin);
-		}
-	}
-
-	set_date(created_movie, month_buffer, day_buffer, year_buffer);
-#ifdef DEBUG
-	printf("Successfully identified the date watched: %d/%d/%d\n", created_movie->date_watched.month_watched,
-			created_movie->date_watched.day_watched, created_movie->date_watched.year_watched);
-#endif
-	printf("\n");
+	edit_movie_name(created_movie);
+	edit_comments(created_movie);
+	edit_rating(created_movie);
+	edit_runtime(created_movie);
+	edit_date(created_movie);
 
 	// Ask for movie's actors
 	status = 0;
@@ -538,22 +411,7 @@ void add_new_movie(movie_t **entered_movie) {
 	
 	created_movie->actor_count = 0;
 	for (int i = 0; i < actor_count; i++) {
-		status = 0;
-		while (status < 1) {
-			printf("Enter the name of actor #%d:\n", (i + 1));
-			status = scanf("%299[^\n]", movie_buffer);
-			while (getchar() != '\n');
-#ifdef DEBUG
-			printf("status = %d\n", status);
-#endif
-			printf("\n");
-			if (status < 1) {
-				printf("Incorrect input. ");
-				clearerr(stdin);
-			}
-		}
-
-		add_actor(created_movie, movie_buffer);
+		new_actor(created_movie);
 	}
 
 	if (loaded_movies == NULL) {

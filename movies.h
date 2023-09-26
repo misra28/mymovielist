@@ -27,6 +27,7 @@ typedef struct movie {
 	int actor_count;
 } movie_t;
 
+// movies.c
 extern movie_t *loaded_movies;
 
 void add_new_movie(movie_t **);
@@ -43,13 +44,19 @@ void set_date(movie_t *, int, int, int);
 void add_actor(movie_t *, char *);
 void remove_actor(movie_t *, char *);
 
+// sorter.c
 void sorting_menu();
 void sort_movies(int, int);
 movie_t *insert_movie(movie_t *, movie_t *, int, int);
 
+// editor.c
 void select_movie();
 void editing_menu(movie_t *);
 void edit_movie_name(movie_t *);
 void edit_comments(movie_t *);
-
+void edit_rating(movie_t *);
+void edit_runtime(movie_t *);
+void edit_date(movie_t *);
+void new_actor(movie_t *);
+void delete_actor(movie_t *);
 #endif
