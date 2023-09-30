@@ -1,3 +1,7 @@
+/* Ahvan Misra, 9/30/2023
+ *
+ */
+
 #include <stdio.h>
 #include <string.h>
 #include "movies.h"
@@ -16,13 +20,13 @@ int main() {
 	
 	while (continue_program == 0) {
 		while (initial_input < 1 || initial_input > OPTION_COUNT) {
-			printf("1. Add movie to my list\n");
-			printf("2. Remove movie from my list\n");
+			printf("1. Add a movie to this list\n");
+			printf("2. Remove a movie from this list\n");
 			printf("3. View my list\n");
-			printf("4. Edit my movies' information\n");
-			printf("5. Sort my movies\n");
+			printf("4. Edit movie information\n");
+			printf("5. Sort movies\n");
 			printf("6. Save my list to a file\n");
-			printf("7. Load my list from a file\n");
+			printf("7. Load a list from a file\n");
 			printf("8. Exit\n\n");
 
 			status = scanf("%d", &initial_input);
@@ -37,7 +41,7 @@ int main() {
 		// Proceed using user input
 		if (initial_input == 1) {
 			add_new_movie(&new_movie);
-			printf("Added a movie called '%s'!\n", loaded_movies->name);
+			printf("\nAdded a movie called '%s'!\n", loaded_movies->name);
 		}
 		else if (initial_input == 2) {
 			status = 0;
@@ -53,7 +57,7 @@ int main() {
 					clearerr(stdin);
 				}
 			}
-				
+
 			nav = loaded_movies;
 
 			if (loaded_movies != NULL) {
@@ -102,6 +106,6 @@ int main() {
 			initial_input = 0;
 		}
 	}
-	printf("Thank you so much for using MyMovieList!\n\n");
+	printf("\nThank you so much for using MyMovieList!\n\n");
 	return 1;
-}		
+}

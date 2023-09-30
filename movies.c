@@ -1,3 +1,11 @@
+/* Ahvan Misra, 9/30/2023
+ *
+ * This file consists of functions that manage the loaded list of movies.
+ * The user can save their list to a file, load a list from an existing
+ * file, print out their list, and add movies to their list.
+ *
+ */
+
 #include <stdio.h>
 #include <malloc.h>
 #include <stdlib.h>
@@ -8,6 +16,11 @@
 
 movie_t *loaded_movies;
 
+/* void save_movie_list()
+ *
+ * Goes through the list and saves all of the movies' information to a text file
+ *
+ */
 void save_movie_list() {
 	FILE *fp = NULL;
 	int status = 0;
@@ -72,8 +85,15 @@ void save_movie_list() {
 
 	fclose(fp);
 	fp = NULL;
-}
+} /* save_movie_list() */
 
+
+/* void load_movie_list()
+ *
+ * Delete all of the currently loaded movies, and create a new list of movies by
+ * reading from a text file
+ *
+ */
 void load_movie_list() {
 	FILE *fp = NULL;
 	int status = 0;
@@ -105,7 +125,7 @@ void load_movie_list() {
 	status = 0;
 	while (status < 1) {
 		printf("Enter the name of the existing file you would like to load from:\n");
-		printf("Alternatively, enter 'exit' to quit.\n");
+		printf("Alternatively, enter 'exit' to quit.\n\n");
 		status = scanf("%99[^\n]", movie_buffer);
 		while (getchar() != '\n');
 #ifdef DEBUG
@@ -192,7 +212,7 @@ void load_movie_list() {
 				nav->name_length, nav->name, nav->comments_length,
 				nav->comments, nav->rating, nav->runtime, nav->date_watched.month_watched,
 				nav->date_watched.day_watched, nav->date_watched.year_watched, nav->actor_count);
-#endif	
+#endif
 	}
 
 	if (feof(fp) != 0) {
@@ -208,8 +228,14 @@ void load_movie_list() {
 
 	fclose(fp);
 	fp = NULL;
-}
+} /* load_movie_list() */
 
+
+/* void remove_movie()
+ *
+ * Delete a specific movie from the list
+ *
+ */
 void remove_movie(movie_t **remove_this) {
 	movie_t *remove = *remove_this;
 
@@ -243,8 +269,14 @@ void remove_movie(movie_t **remove_this) {
 	free(*remove_this);
 	*remove_this = NULL;
 	remove_this = NULL;
-}
+} /* remove_movie() */
 
+
+/* void set_name()
+ *
+ * Change the specified movie's name element to the string provided
+ *
+ */
 void set_name(movie_t *created_movie, char *movie_buffer) {
 	if (created_movie->name != NULL) {
 		free(created_movie->name);
@@ -255,8 +287,14 @@ void set_name(movie_t *created_movie, char *movie_buffer) {
 	strncpy(created_movie->name, movie_buffer, strlen(movie_buffer));
 	created_movie->name[strlen(movie_buffer)] = '\0';
 	created_movie->name_length = (size_t) strlen(movie_buffer);
-}
+} /* set_name() */
 
+
+/* void set_comments()
+ *
+ * Change the specified movie's comments element to the string provided
+ *
+ */
 void set_comments(movie_t *created_movie, char *movie_buffer) {
 	if (created_movie->comments != NULL) {
 		free(created_movie->comments);
@@ -267,8 +305,13 @@ void set_comments(movie_t *created_movie, char *movie_buffer) {
 	strncpy(created_movie->comments, movie_buffer, strlen(movie_buffer));
 	created_movie->comments[strlen(movie_buffer)] = '\0';
 	created_movie->comments_length = (size_t) strlen(movie_buffer);
-}
+} /* set_comments() */
 
+/* void set_rating()
+ *
+ * Change the specified movie's rating element to the value provided
+ *
+ */
 void set_rating(movie_t *created_movie, float rating_buffer) {
 	if (rating_buffer > 10) {
 		printf("The rating was reduced to 10.\n");
@@ -279,12 +322,22 @@ void set_rating(movie_t *created_movie, float rating_buffer) {
 		rating_buffer = 1;
 	}
 	created_movie->rating = rating_buffer;
-}
+} /* set_rating() */
 
+/* void set_runtime()
+ *
+ * Change the specified movie's runtime element to the value provided
+ *
+ */
 void set_runtime(movie_t *created_movie, int runtime_buffer) {
 	created_movie->runtime = runtime_buffer;
-}
+} /* set_runtime() */
 
+/* void set_date()
+ *
+ * Change the specified movie's date to the values provided
+ *
+ */
 void set_date(movie_t *created_movie, int month_buffer, int day_buffer, int year_buffer) {
 	if (month_buffer > 12) {
 		month_buffer = 12;
@@ -304,8 +357,14 @@ void set_date(movie_t *created_movie, int month_buffer, int day_buffer, int year
 	created_movie->date_watched.month_watched = month_buffer;
 	created_movie->date_watched.day_watched = day_buffer;
 	created_movie->date_watched.year_watched = year_buffer;
-}
+} /* set_date() */
 
+
+/* void add_actor()
+ *
+ * Create a new actor node with the given char string and add it to the movie
+ *
+ */
 void add_actor(movie_t *created_movie, char *movie_buffer) {
 	actor_t *actornav = created_movie->actors;
 
@@ -332,8 +391,15 @@ void add_actor(movie_t *created_movie, char *movie_buffer) {
 	created_actor->next = NULL;
 	created_movie->actor_count += 1;
 	created_actor = NULL;
-}
+} /* add_actor() */
 
+
+/* void remove_actor()
+ *
+ * Attempt to find the actor's name in the movie's list of actors,
+ * then delete that actor.
+ *
+ */
 void remove_actor(movie_t *movie, char *name) {
 	int found_actor = 0;
 	actor_t *actornav = movie->actors;
@@ -377,8 +443,13 @@ void remove_actor(movie_t *movie, char *name) {
 	else {
 		printf("'%s' was not recognized as an actor in '%s'.\n", name, movie->name);
 	}
-}
+} /* remove_actor() */
 
+/* void add_new_movie()
+ *
+ * Creates a new movie node and prepends it to the list of loaded movies
+ *
+ */
 void add_new_movie(movie_t **entered_movie) {
 	int status = 0;
 	int actor_count = 0;
@@ -395,7 +466,8 @@ void add_new_movie(movie_t **entered_movie) {
 	// Ask for movie's actors
 	status = 0;
 	while (status < 1) {
-		printf("Enter the number of main/supporting actors in this movie you would like to add (for a maximum of 10):\n");
+		printf("Enter the number of main/supporting actors in this movie");
+		printf(" you would like to add (for a maximum of 10):\n");
 		status = scanf("%d", &actor_count);
 		while (getchar() != '\n');
 #ifdef DEBUG
@@ -424,8 +496,14 @@ void add_new_movie(movie_t **entered_movie) {
 	}
 
 	loaded_movies->prev = NULL;
-}
+} /* add_new_movie() */
 
+
+/* void print_movie_list()
+ *
+ * Prints out the entire list of movies with all of their stored information
+ *
+ */
 void print_movie_list() {
 	movie_t *nav = loaded_movies;
 	int counter = 1;
@@ -447,8 +525,6 @@ void print_movie_list() {
 			printf("\tRuntime: %d minute", nav->runtime);
 			if (nav->runtime != 1) printf("s");
 			printf("\n");
-		} else {
-			printf("\tRuntime: Unknown\n");
 		}
 
 		printf("\tDate watched: %02d/%02d/%04d\n",
@@ -475,4 +551,4 @@ void print_movie_list() {
 		counter++;
 		printf("\n");
 	}
-}
+} /* print_movie_list() */

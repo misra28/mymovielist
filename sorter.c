@@ -1,8 +1,20 @@
+/* Ahvan Misra, 9/30/2023
+ *
+ * This file contains the functions that involve changing the properties of movies.
+ *
+ */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include "movies.h"
 
+
+/* void sorting_menu()
+ *
+ * Prompt the user to select a way to sort their movie list
+ *
+ */
 void sorting_menu() {
 	int initial_input = 0;
 	int status = 0;
@@ -61,8 +73,14 @@ void sorting_menu() {
 	else if (initial_input == OPTION_COUNT) {
 		return;
 	}
-}
+} /* sorting_menu() */
 
+
+/* void sort_movies()
+ *
+ * Sort the movies based on the responses they gave
+ *
+ */
 void sort_movies(int sorting_type, int ascending) {
 	movie_t *new_list = NULL;
 	movie_t *get_movie = NULL;
@@ -90,14 +108,30 @@ void sort_movies(int sorting_type, int ascending) {
 
 	printf("\nSorting complete!\n");
 	loaded_movies = new_list;
-}
+} /* sort_movies() */
 
+
+/* int custom_strcmp()
+ *
+ * A custom strcmp() function that inverts the return value
+ * depending on if the user wants to sort their movies
+ * in ascending or descending order
+ *
+ */
 int custom_strcmp(void *char1, void *char2, int ascending) {
 	int result = strcmp((char *) char1, (char *) char2);
 	if (ascending == 2) result = result * -1;
 	return result;
-}
+} /* custom_strcmp() */
 
+
+/* int custom_numcmp()
+ *
+ * A custom numcmp() function that inverts the return value
+ * depending on if the user wants to sort their movies
+ * in ascending or descending order
+ *
+ */
 int custom_numcmp(void *num1, void *num2, int ascending) {
 	int result = 0;
 	if (*((float *) num1) < *((float *) num2)) result = -1;
@@ -106,8 +140,15 @@ int custom_numcmp(void *num1, void *num2, int ascending) {
 
 	if (ascending == 2) result = result * -1;
 	return result;
-}
+} /* custom_numcmp() */
 
+
+/* movie_t *insert_movie()
+ *
+ * An insertion sorter that removes each movie from the current list and
+ * inserts it into position into the new list
+ *
+ */
 movie_t *insert_movie(movie_t *sorted_list, movie_t *insert, int sorting_type, int ascending) {
 	movie_t *nav = sorted_list;
 	void *insert_val = NULL;
@@ -236,4 +277,4 @@ movie_t *insert_movie(movie_t *sorted_list, movie_t *insert, int sorting_type, i
 	insert->prev = nav;
 	insert->next = NULL;
 	return sorted_list;
-}
+} /* movie_t *insert_movie() */
