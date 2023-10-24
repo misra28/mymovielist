@@ -107,5 +107,5 @@ int main() {
 		}
 	}
 	printf("\nThank you so much for using MyMovieList!\n\n");
-	return 1;
+	return 0;
 }
