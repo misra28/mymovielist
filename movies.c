@@ -12,7 +12,7 @@
 #include <string.h>
 #include "movies.h"
 
-// #define DEBUG
+//#define DEBUG
 
 movie_t *loaded_movies;
 
@@ -204,7 +204,8 @@ void load_movie_list() {
 #endif
 		}
 
-		actornav->next = NULL;
+		if (nav->actor_count > 0)
+			actornav->next = NULL;
 		fscanf(fp, "\n");
 #ifdef DEBUG
 		printf("sizeof(nav) == %lu\n", sizeof(nav));
@@ -266,8 +267,8 @@ void remove_movie(movie_t **remove_this) {
 		remove_actor(remove, remove->actors->name);
 	}
 
-	free(*remove_this);
-	*remove_this = NULL;
+	free(remove);
+	remove = NULL;
 	remove_this = NULL;
 } /* remove_movie() */
 
