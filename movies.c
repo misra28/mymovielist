@@ -155,10 +155,12 @@ void load_movie_list() {
 		created_movie = (movie_t *) malloc(sizeof(movie_t));
 		if (loaded_movies == NULL) {
 			loaded_movies = created_movie;
+			loaded_movies->next = NULL;
 		}
 		else {
 			created_movie->prev = nav;
 			nav->next = created_movie;
+			nav->next->next = NULL;
 		}
 
 		nav = created_movie;
@@ -241,6 +243,8 @@ void remove_movie(movie_t **remove_this) {
 	movie_t *remove = *remove_this;
 
 	if (remove_this == NULL || remove == NULL) {
+		remove = NULL;
+		remove_this = NULL;
 		return;
 	}
 
@@ -340,19 +344,31 @@ void set_runtime(movie_t *created_movie, int runtime_buffer) {
  *
  */
 void set_date(movie_t *created_movie, int month_buffer, int day_buffer, int year_buffer) {
+	if (month_buffer < 0) {
+		month_buffer = -1 * month_buffer;
+	}
+
+	if (day_buffer < 0) {
+		day_buffer = -1 * day_buffer;
+	}
+
+	if (year_buffer < 0) {
+		year_buffer = -1 * year_buffer;
+	}
+
 	if (month_buffer > 12) {
 		month_buffer = 12;
-		printf("The month number was reduced to %d.\n", month_buffer);
+		printf("The month number was set to %d.\n", month_buffer);
 	}
 
 	if (day_buffer > 31) {
 		day_buffer = 31;
-		printf("The day number was reduced to %d.\n", day_buffer);
+		printf("The day number was set to %d.\n", day_buffer);
 	}
 
 	if (year_buffer > 9999) {
 		year_buffer = 9999;
-		printf("The year was reduced to %d.\n", year_buffer);
+		printf("The year was set to %d.\n", year_buffer);
 	}
 
 	created_movie->date_watched.month_watched = month_buffer;
