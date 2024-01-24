@@ -16,6 +16,10 @@ int main() {
 	movie_t *nav = NULL;
 	int found_desired_movie = 0;
 
+#ifdef DEBUG
+	printf("TODO: Test the parse_text_input function.\n\n");
+#endif
+
 	printf("\n\n\nWelcome to MyMovieList!\nSelect an option by entering the corresponding number.\n\n");
 	
 	while (continue_program == 0) {

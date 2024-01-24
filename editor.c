@@ -144,33 +144,6 @@ void delete_actor(movie_t *movie_to_edit) {
 } /* delete_actor() */
 
 
-/* void new_actor()
- *
- * Prompt the user to add an actor of their choice
- *
- */
-void new_actor(movie_t *movie_to_edit) {
-	int status = 0;
-	char movie_buffer[300] = { 0 };
-
-	while (status < 1) {
-		printf("Enter the name of the actor to add:\n");
-		status = scanf("%299[^\n]", movie_buffer);
-		while (getchar() != '\n');
-#ifdef DEBUG
-		printf("status = %d\n", status);
-#endif
-		printf("\n");
-		if (status < 1) {
-			printf("Incorrect input. ");
-			clearerr(stdin);
-		}
-	}
-	printf("\n");
-	add_actor(movie_to_edit, movie_buffer);
-} /* new_actor() */
-
-
 /* void edit_date()
  *
  * Prompt the user to change the date they watched the movie

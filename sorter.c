@@ -68,7 +68,9 @@ void sorting_menu() {
 
 	// Call sort_movies() if arguments are correct
 	if (initial_input > 0 && initial_input < OPTION_COUNT) {
+		if (initial_input != 4) sort_movies(4, 1);
 		sort_movies(initial_input, ascending);
+		printf("\nSorting complete!\n");
 	}
 	else if (initial_input == OPTION_COUNT) {
 		return;
@@ -78,7 +80,7 @@ void sorting_menu() {
 
 /* void sort_movies()
  *
- * Sort the movies based on the responses they gave
+ * Sort the movies based on the responses the user gave
  *
  */
 void sort_movies(int sorting_type, int ascending) {
@@ -106,7 +108,6 @@ void sort_movies(int sorting_type, int ascending) {
 		get_movie = NULL;
 	}
 
-	printf("\nSorting complete!\n");
 	loaded_movies = new_list;
 } /* sort_movies() */
 

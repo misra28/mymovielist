@@ -35,6 +35,7 @@ void print_movie_list();
 void remove_movie(movie_t **);
 void save_movie_list();
 void load_movie_list();
+void parse_text_input(char **);
 
 void set_name(movie_t *, char *);
 void set_comments(movie_t *, char *);

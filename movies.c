@@ -16,6 +16,68 @@
 
 movie_t *loaded_movies;
 
+void parse_text_input(char **input) {
+	char *text = *input;
+	char *detect = NULL;
+	int char_adder = 0;
+	int i = 0;
+	int j = 0;
+	int len = strlen(text);
+	int txt_present = 1;
+	char *new_string = NULL;
+
+	for (i = 0; i < len; i++) {
+		if (text[i] == '#' || text[i] == '\'' ||
+			text[i] == '%' || text[i] == '"' || text[i] == '!' ||
+			text[i] == '*' || text[i] == '@' || text[i] == '|' ||
+			text[i] == '?' || text[i] == '=' || text[i] == '$' ||
+			text[i] == ':' || text[i] == '+' || text[i] == '\\' ||
+			text[i] == '{' || text[i] == '}' || text[i] == '&' ||
+			text[i] == '<' || text[i] == '>' || text[i] == '`') {
+
+			text[i] = '/';
+		}
+
+		if (text[i] == '/') {
+			char_adder--;
+		}
+
+		if (text[i] == ' ') {
+			text[i] = '_';
+		}
+
+		if (text[i] == '.') {
+			detect = &text[i];
+		}
+	}
+
+	if (detect != NULL && strcmp(detect, ".txt") == 0) {
+		txt_present = 1;
+	}
+	else {
+		char_adder += 4;
+		txt_present = 0;
+	}
+
+	new_string = malloc(len + char_adder + 1);
+	j = 0;
+	for (i = 0; i < len + char_adder + 1; i++) {
+		if (text[i] != '/') {
+			new_string[j] = text[i];
+			j++;
+		}
+	}
+	j -= char_adder + 1;
+	if (txt_present == 0) {
+		new_string[j] = '.';
+		new_string[j + 1] = 't';
+		new_string[j + 2] = 'x';
+		new_string[j + 3] = 't';
+	}
+	free(*input);
+	*input = new_string;
+}
+
 /* void save_movie_list()
  *
  * Goes through the list and saves all of the movies' information to a text file
@@ -25,6 +87,7 @@ void save_movie_list() {
 	FILE *fp = NULL;
 	int status = 0;
 	char movie_buffer[100] = { 0 };
+	char *parsed_name = NULL;
 	movie_t *nav = loaded_movies;
 	actor_t *actornav = NULL;
 	int i = 0;
@@ -41,12 +104,20 @@ void save_movie_list() {
 #ifdef DEBUG
 		printf("status = %d, movie_buffer = %s\n", status, movie_buffer);
 #endif
-		fp = fopen(movie_buffer, "w");
-		if (status < 1 || fp == NULL) {
+		parsed_name = strdup(movie_buffer);
+		parse_text_input(&parsed_name);
+#ifdef DEBUG
+		printf("After parsing: parsed_name = %s\n", parsed_name);
+#endif
+		printf("Opening file '%s'...\n\n", parsed_name);
+		fp = fopen(parsed_name, "w");
+		if (status < 1 || fp == NULL || strlen(parsed_name) <= 5) {
 			printf("Incorrect input. ");
 			clearerr(stdin);
 			status = 0;
 		}
+		free(parsed_name);
+		parsed_name = NULL;
 	}
 	
 	while (nav != NULL) {
@@ -98,6 +169,7 @@ void load_movie_list() {
 	FILE *fp = NULL;
 	int status = 0;
 	char movie_buffer[100] = { 0 };
+	char *parsed_name = NULL;
 	movie_t *nav = loaded_movies;
 	movie_t *created_movie = NULL;
 	actor_t *actornav = NULL;
@@ -131,18 +203,26 @@ void load_movie_list() {
 #ifdef DEBUG
 		printf("status = %d, movie_buffer = %s\n", status, movie_buffer);
 #endif
+
 		if (strcmp(movie_buffer, "exit") == 0) {
 			printf("Canceling...\n");
 			return;
 		}
+		parsed_name = strdup(movie_buffer);
+		parse_text_input(&parsed_name);
+#ifdef DEBUG
+		printf("After parsing: parsed_name = %s\n", parsed_name);
+#endif
 
-		fp = fopen(movie_buffer, "r");
-
+		printf("Opening file '%s'...\n\n", movie_buffer);
+		fp = fopen(parsed_name, "r");
 		if (status < 1 || fp == NULL) {
 			printf("Incorrect input. ");
 			clearerr(stdin);
 			status = 0;
 		}
+		free(parsed_name);
+		parsed_name = NULL;
 	}
 
 	// Remove all currently loaded movies
@@ -302,7 +382,7 @@ void set_name(movie_t *created_movie, char *movie_buffer) {
  */
 void set_comments(movie_t *created_movie, char *movie_buffer) {
 	if (created_movie->comments != NULL) {
-		free(created_movie->comments);
+		// free(created_movie->comments);
 		created_movie->comments = NULL;
 	}
 
@@ -376,6 +456,32 @@ void set_date(movie_t *created_movie, int month_buffer, int day_buffer, int year
 	created_movie->date_watched.year_watched = year_buffer;
 } /* set_date() */
 
+/* void new_actor()
+ *
+ * Prompt the user to add an actor of their choice
+ *
+ */
+void new_actor(movie_t *movie_to_edit) {
+	int status = 0;
+	char movie_buffer[300] = { 0 };
+
+	while (status < 1) {
+		printf("Enter the name of the actor to add:\n");
+		status = scanf("%299[^\n]", movie_buffer);
+		while (getchar() != '\n');
+#ifdef DEBUG
+		printf("status = %d\n", status);
+#endif
+		printf("\n");
+		if (status < 1) {
+			printf("Incorrect input. ");
+			clearerr(stdin);
+		}
+	}
+	printf("\n");
+
+	add_actor(movie_to_edit, movie_buffer);
+} /* new_actor() */
 
 /* void add_actor()
  *
@@ -387,20 +493,22 @@ void add_actor(movie_t *created_movie, char *movie_buffer) {
 
 	// Allocate a new node for the created actor depending on the buffer's size
 	actor_t *created_actor = malloc(sizeof(actor_t));
-	created_actor->name = malloc(strlen(movie_buffer) + 1);
+	created_actor->next = NULL;
+	/*created_actor->name = malloc(strlen(movie_buffer) + 1);
 	strncpy(created_actor->name, movie_buffer, strlen(movie_buffer));
-	created_actor->name[strlen(movie_buffer)] = '\0';
+	created_actor->name[strlen(movie_buffer)] = '\0';*/
+	created_actor->name = strdup(movie_buffer);
 	created_actor->name_length = (size_t) strlen(movie_buffer);
 
 	// Append the new node to the linked list of the movie's actors
-	if (actornav == NULL) {
+	if (created_movie->actors == NULL) {
 		created_movie->actors = created_actor;
 		created_movie->actor_count += 1;
 		created_actor = NULL;
 		return;
 	}
 
-	while (actornav->next != NULL) {
+	for (int i = 0; i < created_movie->actor_count - 1; i++) {
 		actornav = actornav->next;
 	}
 
@@ -473,7 +581,9 @@ void add_new_movie(movie_t **entered_movie) {
 	
 	*entered_movie = malloc(sizeof(movie_t));
 	movie_t *created_movie = *entered_movie;
-
+	created_movie->name = NULL;
+	created_movie->comments = NULL;
+	created_movie->actors = NULL;
 	edit_movie_name(created_movie);
 	edit_comments(created_movie);
 	edit_rating(created_movie);
